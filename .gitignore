@@ -2,3 +2,42 @@
 # à des chemins absolus vers ~/.pyenv/versions/, donc inutilisables ailleurs.
 # C'est requirements.txt qui se transporte d'une machine à l'autre.
 .venv/
+venv/
+env/
+
+# Bytecode compilé — régénéré automatiquement par Python à chaque exécution.
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Paquets et distribution — produits par un build, jamais des sources.
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Outils de test et de qualité — caches locaux.
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Variables d'environnement — contiennent souvent des secrets.
+.env
+.env.*
+!.env.example
+
+# Éditeurs et système
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Ansible — sorties d'exécution locales.
+*.retry
