@@ -123,6 +123,26 @@ Les trois commandes pointent bien vers `~/projects/ansible-lab/.venv/bin/` — c
 2. **`sudo apt` délégué à l'utilisateur** (étape 1) — sudo exige un mot de passe saisi au terminal.
 3. **`libncursesw5-dev`** — résolu vers `libncurses-dev` par apt (paquet virtuel sur noble). `dpkg-query` le rapporte comme absent alors que la dépendance est satisfaite ; c'est le champ `Provides` qui fait foi.
 
+## Persistance après redémarrage
+
+Vérifié le 2026-08-14, sans redémarrer la machine : un reboot ne modifie rien sur le disque, ce qu'il met réellement à l'épreuve c'est le chargement de `~/.bashrc` dans un shell neuf. C'est donc ce qui a été testé, via `bash -ic` (terminal graphique) et `bash -lic` (SSH / TTY).
+
+| Contexte | pyenv | python |
+|---|---|---|
+| Shell interactif (terminal graphique) | 2.8.4 | 3.12.9 via shims |
+| Shell de login (SSH / TTY) | 2.8.4 | 3.12.9 via shims |
+
+Activation du venv depuis un shell neuf : `python` et `ansible` résolvent bien vers `.venv/bin/`, `ansible-core 2.21.3` répond, et les imports `ansible`, `ssl`, `sqlite3`, `lzma` passent.
+
+Ce qui garantit la persistance :
+
+- `~/.pyenv/version` contient `3.12.9` — un fichier sur disque, pas une variable d'environnement
+- `.venv/bin/python` est un lien symbolique **absolu** vers `~/.pyenv/versions/3.12.9/bin/python`
+- `.venv/pyvenv.cfg` référence le même chemin en dur (`home = /home/sylvain/.pyenv/versions/3.12.9/bin`)
+- aucune référence à `/tmp` ni à un emplacement éphémère
+
+> ⚠️ Le venv est lié en dur à `~/.pyenv/versions/3.12.9`. Un `pyenv uninstall 3.12.9` le casserait sans avertissement — il faudrait alors le recréer (`python -m venv .venv` puis réinstaller les dépendances).
+
 ## Reprise de l'environnement
 
 Dans un nouveau terminal (la config `~/.bashrc` est déjà active) :
