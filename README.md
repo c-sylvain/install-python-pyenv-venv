@@ -143,11 +143,43 @@ Ce qui garantit la persistance :
 
 > ⚠️ Le venv est lié en dur à `~/.pyenv/versions/3.12.9`. Un `pyenv uninstall 3.12.9` le casserait sans avertissement — il faudrait alors le recréer (`python -m venv .venv` puis réinstaller les dépendances).
 
+## Second projet : une autre version de Python
+
+Ajouté le 2026-08-14, hors procédure initiale, pour valider la cohabitation de deux versions de Python sur la même machine.
+
+```bash
+pyenv install 3.13.15
+
+mkdir -p ~/projects/python-lab && cd ~/projects/python-lab
+pyenv local 3.13.15          # écrit .python-version dans le dossier
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+```
+
+Aucun paquet apt supplémentaire n'a été nécessaire : les dépendances de build de l'étape 1 ont resservi telles quelles. Les modules critiques (`ssl`, `sqlite3`, `lzma`, `bz2`, `ctypes`, `readline`, `zlib`, `tkinter`) sont tous présents sur le 3.13.15.
+
+À noter : `pip` était déjà en 26.2.1 dans le venv neuf — l'`ensurepip` de Python 3.13.15 embarque une version récente, l'`--upgrade` n'avait donc rien à faire.
+
+### Les deux environnements côte à côte
+
+| | `ansible-lab` | `python-lab` |
+|---|---|---|
+| Python | 3.12.9 | 3.13.15 |
+| Sélection de version | global pyenv | `.python-version` (local) |
+| Contenu du venv | ansible 14.3.1 | nu, pip 26.2.1 |
+| Vérifié en shell neuf | ✅ | ✅ |
+
+`pyenv global` reste à **3.12.9** : `pyenv local` n'écrit qu'un fichier `.python-version` dans le dossier du projet. Entrer dans `~/projects/python-lab` bascule automatiquement sur 3.13.15, en sortir revient à 3.12.9. Vérifié après coup que `ansible-lab` est resté intact.
+
 ## Reprise de l'environnement
 
 Dans un nouveau terminal (la config `~/.bashrc` est déjà active) :
 
 ```bash
-cd ~/projects/ansible-lab
-source .venv/bin/activate
+# Projet ansible (Python 3.12.9)
+cd ~/projects/ansible-lab && source .venv/bin/activate
+
+# Projet python-lab (Python 3.13.15, sélectionné par .python-version)
+cd ~/projects/python-lab && source .venv/bin/activate
 ```
