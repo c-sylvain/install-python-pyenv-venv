@@ -131,7 +131,12 @@ python -m pip install -r requirements.txt    # le restaurer ailleurs
 
 Règle qui va avec : on versionne `requirements.txt` dans git, **jamais** le dossier `.venv/` (lourd, et inutilisable sur une autre machine). Un fichier `.gitignore` contenant `.venv/` suffit.
 
-Les deux projets décrits ici (dans `~/projects/`, hors de ce dépôt) ont chacun leur `requirements.txt`, généré par `pip freeze` et strictement identique à l'autre :
+Les deux projets décrits ici vivent dans `~/projects/`, hors de ce dépôt. Une copie de leurs `requirements.txt` y est versionnée pour référence :
+
+- [`projets/ansible-lab/requirements.txt`](projets/ansible-lab/requirements.txt)
+- [`projets/python-lab/requirements.txt`](projets/python-lab/requirements.txt)
+
+Les deux sont strictement identiques :
 
 ```
 ansible==14.3.1        cryptography==50.0.0    packaging==26.3
@@ -141,6 +146,21 @@ cffi==2.1.1            MarkupSafe==3.0.3       PyYAML==6.0.3
 ```
 
 Attendu : seul l'interpréteur diffère entre les deux environnements, pas les paquets.
+
+Pour recréer l'un de ces environnements sur une autre machine :
+
+```bash
+pyenv install 3.12.9                 # ou 3.13.15 pour python-lab
+mkdir -p ~/projects/ansible-lab && cd ~/projects/ansible-lab
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -r /chemin/vers/projets/ansible-lab/requirements.txt
+```
+
+> Ces fichiers sont des **copies** prises le 2026-08-14, les originaux restant dans les dossiers de projet. Après tout `pip install` dans un venv, il faut régénérer puis recopier, sinon les deux divergent silencieusement :
+>
+> ```bash
+> python -m pip freeze > requirements.txt
+> ```
 
 ## Les erreurs classiques
 
