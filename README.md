@@ -155,11 +155,14 @@ pyenv local 3.13.15          # écrit .python-version dans le dossier
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
+python -m pip install ansible
 ```
 
 Aucun paquet apt supplémentaire n'a été nécessaire : les dépendances de build de l'étape 1 ont resservi telles quelles. Les modules critiques (`ssl`, `sqlite3`, `lzma`, `bz2`, `ctypes`, `readline`, `zlib`, `tkinter`) sont tous présents sur le 3.13.15.
 
 À noter : `pip` était déjà en 26.2.1 dans le venv neuf — l'`ensurepip` de Python 3.13.15 embarque une version récente, l'`--upgrade` n'avait donc rien à faire.
+
+Le venv a d'abord été créé nu, puis ansible y a été ajouté dans un second temps, afin de disposer du même ansible sur deux versions de Python et pouvoir y comparer un comportement.
 
 ### Les deux environnements côte à côte
 
@@ -167,8 +170,12 @@ Aucun paquet apt supplémentaire n'a été nécessaire : les dépendances de bui
 |---|---|---|
 | Python | 3.12.9 | 3.13.15 |
 | Sélection de version | global pyenv | `.python-version` (local) |
-| Contenu du venv | ansible 14.3.1 | nu, pip 26.2.1 |
+| ansible | 14.3.1 | 14.3.1 |
+| ansible-core | 2.21.3 | 2.21.3 |
+| `site-packages` | `.venv/lib/python3.12/` | `.venv/lib/python3.13/` |
 | Vérifié en shell neuf | ✅ | ✅ |
+
+Les deux projets embarquent exactement les mêmes versions d'ansible et de ses dépendances (`jinja2 3.1.6`, `cryptography 50.0.0`, `PyYAML 6.0.3`), seul l'interpréteur diffère.
 
 `pyenv global` reste à **3.12.9** : `pyenv local` n'écrit qu'un fichier `.python-version` dans le dossier du projet. Entrer dans `~/projects/python-lab` bascule automatiquement sur 3.13.15, en sortir revient à 3.12.9. Vérifié après coup que `ansible-lab` est resté intact.
 
