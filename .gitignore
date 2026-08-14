@@ -1,0 +1,4 @@
+# Environnements virtuels — jamais versionnés : volumineux, et liés en dur
+# à des chemins absolus vers ~/.pyenv/versions/, donc inutilisables ailleurs.
+# C'est requirements.txt qui se transporte d'une machine à l'autre.
+.venv/
