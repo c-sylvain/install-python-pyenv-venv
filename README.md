@@ -179,6 +179,38 @@ Les deux projets embarquent exactement les mêmes versions d'ansible et de ses d
 
 `pyenv global` reste à **3.12.9** : `pyenv local` n'écrit qu'un fichier `.python-version` dans le dossier du projet. Entrer dans `~/projects/python-lab` bascule automatiquement sur 3.13.15, en sortir revient à 3.12.9. Vérifié après coup que `ansible-lab` est resté intact.
 
+## Test fonctionnel : un playbook sur les deux versions
+
+[`smoke-test.yml`](smoke-test.yml) est un playbook minimal qui exerce les briques usuelles d'ansible : collecte de facts, `set_fact`, boucle, module `copy`, `slurp`, filtre `b64decode` et `assert`. Il tourne sur `localhost` en `connection: local`, sans inventaire.
+
+```bash
+cd ~/projects/ansible-lab && source .venv/bin/activate   # ou python-lab
+ansible-playbook ~/PROJETS/install-python-pyenv-venv/smoke-test.yml
+```
+
+### Résultats
+
+| | Python 3.12.9 | Python 3.13.15 |
+|---|---|---|
+| Tâches OK | 7 | 7 |
+| `changed` | 1 | 1 |
+| `failed` | 0 | 0 |
+| Interpréteur détecté | `ansible-lab/.venv/bin/python` | `python-lab/.venv/bin/python` |
+| Fichier généré | `/tmp/smoke-3.12.9.txt` | `/tmp/smoke-3.13.15.txt` |
+| `assert` sur le contenu relu | ✅ | ✅ |
+
+Sorties identiques sur les deux versions. Chaque venv utilise bien son propre interpréteur — ansible ne retombe pas sur le Python système. Une seconde passe donne `changed=0`, l'idempotence est donc correcte.
+
+### Note sur les facts dépréciés
+
+À la première exécution, ansible-core 2.21 émettait un `DEPRECATION WARNING` sur `ansible_python_version` :
+
+> `INJECT_FACTS_AS_VARS` default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+
+Le playbook a été réécrit en `ansible_facts['python_version']`, la forme pérenne, ce qui supprime l'avertissement. À garder en tête pour d'anciens playbooks qui utiliseraient encore les facts comme variables de premier niveau.
+
+Les variables magiques `ansible_version` et `ansible_playbook_python` ne sont **pas** concernées : ce ne sont pas des facts, elles gardent leur forme actuelle.
+
 ## Reprise de l'environnement
 
 Dans un nouveau terminal (la config `~/.bashrc` est déjà active) :

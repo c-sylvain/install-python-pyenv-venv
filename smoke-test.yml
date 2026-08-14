@@ -1,0 +1,45 @@
+---
+# Playbook de test minimal, exécuté sur les deux venvs (Python 3.12.9 et 3.13.15)
+# Usage : ansible-playbook ~/PROJETS/install-python-pyenv-venv/smoke-test.yml
+- name: Smoke test ansible
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  tasks:
+    - name: Afficher l'interpréteur et la version d'ansible
+      ansible.builtin.debug:
+        msg: >-
+          Python {{ ansible_facts['python_version'] }} —
+          ansible-core {{ ansible_version.full }} —
+          interpréteur {{ ansible_playbook_python }}
+
+    - name: Définir une variable
+      ansible.builtin.set_fact:
+        projets:
+          - ansible-lab
+          - python-lab
+
+    - name: Boucler sur la variable
+      ansible.builtin.debug:
+        msg: "projet : {{ item }}"
+      loop: "{{ projets }}"
+
+    - name: Écrire un fichier
+      ansible.builtin.copy:
+        content: "genere par ansible sur python {{ ansible_facts['python_version'] }}\n"
+        dest: "/tmp/smoke-{{ ansible_facts['python_version'] }}.txt"
+        mode: "0644"
+
+    - name: Relire le fichier
+      ansible.builtin.slurp:
+        src: "/tmp/smoke-{{ ansible_facts['python_version'] }}.txt"
+      register: relu
+
+    - name: Vérifier le contenu relu
+      ansible.builtin.assert:
+        that:
+          - "'genere par ansible' in (relu.content | b64decode)"
+          - "ansible_facts['python_version'] in (relu.content | b64decode)"
+        success_msg: "Contenu conforme"
+        fail_msg: "Contenu inattendu"
